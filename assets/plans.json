@@ -1,0 +1,21 @@
+[
+  { "country": "日本", "days": 3, "dataGb": 1, "priceTwd": 90, "hotspot": false },
+  { "country": "日本", "days": 5, "dataGb": 5, "priceTwd": 200, "hotspot": true },
+  { "country": "日本", "days": 7, "dataGb": 7, "priceTwd": 260, "hotspot": true },
+  { "country": "日本", "days": 10, "dataGb": 20, "priceTwd": 420, "hotspot": true },
+
+  { "country": "冰島", "days": 3, "dataGb": 1, "priceTwd": 80, "hotspot": false },
+  { "country": "冰島", "days": 5, "dataGb": 5, "priceTwd": 190, "hotspot": true },
+  { "country": "冰島", "days": 7, "dataGb": 10, "priceTwd": 280, "hotspot": true },
+  { "country": "冰島", "days": 10, "dataGb": 20, "priceTwd": 400, "hotspot": true },
+
+  { "country": "韓國", "days": 3, "dataGb": 1, "priceTwd": 80, "hotspot": false },
+  { "country": "韓國", "days": 5, "dataGb": 5, "priceTwd": 190, "hotspot": true },
+  { "country": "韓國", "days": 7, "dataGb": 10, "priceTwd": 280, "hotspot": true },
+  { "country": "韓國", "days": 10, "dataGb": 20, "priceTwd": 400, "hotspot": true },
+
+  { "country": "泰國", "days": 3, "dataGb": 1, "priceTwd": 70, "hotspot": false },
+  { "country": "泰國", "days": 5, "dataGb": 5, "priceTwd": 170, "hotspot": true },
+  { "country": "泰國", "days": 7, "dataGb": 7, "priceTwd": 230, "hotspot": true },
+  { "country": "泰國", "days": 10, "dataGb": 20, "priceTwd": 380, "hotspot": true }
+]
