@@ -47,6 +47,22 @@ Future<List<GuideStep>> loadSteps() async {
       .toList();
 }
 
+/// 手機系統：落地後的操作路徑，iPhone 和 Android 不一樣
+enum OsKind { ios, android }
+
+/// 落地後開啟網路的步驟（對應 assets/landing_steps.json）
+/// 回傳的是「系統 → 步驟清單」，iPhone 和 Android 各一份
+Future<Map<OsKind, List<GuideStep>>> loadLandingSteps() async {
+  final raw = await rootBundle.loadString('assets/landing_steps.json');
+  final json = jsonDecode(raw) as Map<String, dynamic>;
+
+  List<GuideStep> parse(String key) => (json[key] as List<dynamic>)
+      .map((e) => GuideStep.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+  return {OsKind.ios: parse('ios'), OsKind.android: parse('android')};
+}
+
 /// 一個 eSIM 方案（對應 assets/plans.json）
 /// 注意：目前是「範例資料」，不是真實的供應商方案與價格。
 class EsimPlan {

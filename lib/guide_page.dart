@@ -18,6 +18,12 @@ IconData iconFor(String name) {
       return Icons.pause_circle_outline;
     case 'check':
       return Icons.check_circle_outline;
+    case 'power':
+      return Icons.power_settings_new;
+    case 'roaming':
+      return Icons.public;
+    case 'sim':
+      return Icons.sim_card_outlined;
     default:
       return Icons.help_outline;
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'guide_page.dart';
+import 'landing_page.dart';
 import 'models.dart';
 import 'providers.dart';
 import 'recommend_page.dart';
@@ -66,6 +67,13 @@ class HomePage extends ConsumerWidget {
               MaterialPageRoute<void>(builder: (_) => const RecommendPage()),
             ),
             child: const Text('看推薦方案'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const LandingPage()),
+            ),
+            child: const Text('已經落地了？開啟網路'),
           ),
           const SizedBox(height: 12),
           TextButton(

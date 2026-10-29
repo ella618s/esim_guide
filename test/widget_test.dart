@@ -34,6 +34,24 @@ void main() {
     expect(find.text('6 天'), findsOneWidget);
   });
 
+  testWidgets('落地頁有三個步驟，可以勾選完成', (tester) async {
+    await pumpApp(tester);
+
+    final button = find.text('已經落地了？開啟網路');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(find.text('落地了！開啟網路'), findsOneWidget);
+    expect(find.byType(Checkbox), findsNWidgets(3));
+
+    await tester.tap(find.byType(Checkbox).first);
+    await tester.pump();
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+    expect(find.text('已完成 1 / 3'), findsOneWidget);
+  });
+
   testWidgets('會還原上次儲存的行程', (tester) async {
     await pumpApp(
       tester,

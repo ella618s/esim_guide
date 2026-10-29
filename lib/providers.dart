@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -68,3 +70,60 @@ class GuideIndexNotifier extends Notifier<int> {
 
 final guideIndexProvider =
     NotifierProvider<GuideIndexNotifier, int>(GuideIndexNotifier.new);
+
+/// 落地後的操作步驟（iPhone／Android 各一份）
+final landingStepsProvider =
+    FutureProvider<Map<OsKind, List<GuideStep>>>((ref) => loadLandingSteps());
+
+/// 目前顯示哪一個系統的教學。預設依手機自己的系統，使用者也可以手動切換
+/// （例如幫爸媽設定時，可以切到對方的手機系統）
+class OsKindNotifier extends Notifier<OsKind> {
+  @override
+  OsKind build() {
+    final platform = defaultTargetPlatform;
+    // macOS 也算 iOS：在 Mac 上用 Chrome 測試時，預設顯示 iPhone 的步驟
+    final isApple =
+        platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
+    return isApple ? OsKind.ios : OsKind.android;
+  }
+
+  void set(OsKind kind) => state = kind;
+}
+
+final osKindProvider =
+    NotifierProvider<OsKindNotifier, OsKind>(OsKindNotifier.new);
+
+/// 落地後三步驟：哪些已經勾選完成（存的是步驟編號 0、1、2）
+class LandingDoneNotifier extends Notifier<Set<int>> {
+  static const _key = 'landing_done';
+
+  @override
+  Set<int> build() {
+    final saved = ref.watch(sharedPreferencesProvider).getStringList(_key) ??
+        const <String>[];
+    return saved.map(int.tryParse).whereType<int>().toSet();
+  }
+
+  void setDone(int index, bool done) {
+    // 不直接修改舊的 Set，而是建立新的，Riverpod 才知道資料變了
+    final next = {...state};
+    if (done) {
+      next.add(index);
+    } else {
+      next.remove(index);
+    }
+    _update(next);
+  }
+
+  void reset() => _update(<int>{});
+
+  void _update(Set<int> next) {
+    state = next;
+    ref
+        .read(sharedPreferencesProvider)
+        .setStringList(_key, next.map((e) => e.toString()).toList());
+  }
+}
+
+final landingDoneProvider =
+    NotifierProvider<LandingDoneNotifier, Set<int>>(LandingDoneNotifier.new);
