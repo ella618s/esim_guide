@@ -1,3 +1,4 @@
+import 'package:esim_guide/esim_support.dart';
 import 'package:esim_guide/main.dart';
 import 'package:esim_guide/providers.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +10,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> pumpApp(
   WidgetTester tester, {
   Map<String, Object> savedValues = const {},
+  EsimSupport? esim,
 }) async {
   SharedPreferences.setMockInitialValues(savedValues);
   final prefs = await SharedPreferences.getInstance();
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        // 測試時不去問真正的原生程式，直接指定結果
+        if (esim != null) esimSupportProvider.overrideWith((ref) async => esim),
+      ],
       child: const EsimGuideApp(),
     ),
   );
@@ -69,6 +75,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('設定 > 行動服務 > 點選旅遊 eSIM'), findsOneWidget);
     expect(find.text('設定 > 連線 > SIM 卡管理器'), findsNothing);
+  });
+
+  testWidgets('eSIM 檢查頁：支援時顯示支援', (tester) async {
+    await pumpApp(tester, esim: EsimSupport.supported);
+
+    final button = find.text('我的手機支援 eSIM 嗎？');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(find.text('你的手機支援 eSIM'), findsOneWidget);
+  });
+
+  testWidgets('eSIM 檢查頁：查不到時誠實顯示無法判斷', (tester) async {
+    // 不指定結果：測試環境沒有原生程式，會得到 unknown
+    await pumpApp(tester);
+
+    final button = find.text('我的手機支援 eSIM 嗎？');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(find.text('沒辦法自動判斷'), findsOneWidget);
   });
 
   testWidgets('排查流程：依回答前往下一題，也可以回上一題', (tester) async {

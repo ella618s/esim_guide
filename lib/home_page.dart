@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'esim_check_page.dart';
 import 'guide_page.dart';
 import 'landing_page.dart';
 import 'models.dart';
@@ -63,6 +64,13 @@ class HomePage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 40),
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const EsimCheckPage()),
+            ),
+            child: const Text('我的手機支援 eSIM 嗎？'),
+          ),
+          const SizedBox(height: 12),
           FilledButton(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const RecommendPage()),

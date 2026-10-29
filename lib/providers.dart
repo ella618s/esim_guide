@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'esim_support.dart';
 import 'models.dart';
 
 /// 本地儲存（SharedPreferences）。
@@ -155,3 +156,7 @@ final landingDoneProvider =
 /// 沒網路時的排查流程（資料來自 assets/troubleshoot.json）
 final troubleshootProvider =
     FutureProvider<TroubleFlow>((ref) => loadTroubleFlow());
+
+/// 這支手機支援 eSIM 嗎？（問原生程式，結果不存起來，每次進頁面都重新問）
+final esimSupportProvider =
+    FutureProvider.autoDispose<EsimSupport>((ref) => checkEsimSupport());
