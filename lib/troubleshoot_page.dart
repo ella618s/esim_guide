@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'landing_page.dart';
+import 'landing_page.dart' show LandingPage, DevicePathBox;
 import 'models.dart';
 import 'providers.dart';
 
@@ -30,16 +30,16 @@ class TroubleshootPage extends ConsumerWidget {
 
 /// 「目前走到哪一題」只有這個畫面自己需要知道，離開畫面就不用記，
 /// 所以放在 State 裡（暫時性的畫面狀態），不放進 Riverpod。
-class _TroubleshootBody extends StatefulWidget {
+class _TroubleshootBody extends ConsumerStatefulWidget {
   const _TroubleshootBody({required this.flow});
 
   final TroubleFlow flow;
 
   @override
-  State<_TroubleshootBody> createState() => _TroubleshootBodyState();
+  ConsumerState<_TroubleshootBody> createState() => _TroubleshootBodyState();
 }
 
-class _TroubleshootBodyState extends State<_TroubleshootBody> {
+class _TroubleshootBodyState extends ConsumerState<_TroubleshootBody> {
   /// 走過的節點 id，最後一個就是現在這一題；按「上一題」就是把最後一個拿掉
   late final List<String> _path = [widget.flow.start];
 
@@ -121,6 +121,7 @@ class _TroubleshootBodyState extends State<_TroubleshootBody> {
   @override
   Widget build(BuildContext context) {
     final node = _node;
+    final device = ref.watch(currentDeviceProvider);
 
     // PopScope：在第一題以外的地方按返回，是回到「上一題」，而不是離開整個頁面
     return PopScope(
@@ -153,6 +154,8 @@ class _TroubleshootBodyState extends State<_TroubleshootBody> {
               ),
             _NodeCard(node: node),
             const SizedBox(height: 16),
+            if (device != null)
+              DevicePathBox(device: device, pathKey: node.pathKey),
             ..._buildActions(node),
           ],
         ),

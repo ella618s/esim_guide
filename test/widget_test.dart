@@ -52,6 +52,25 @@ void main() {
     expect(find.text('已完成 1 / 3'), findsOneWidget);
   });
 
+  testWidgets('落地頁：選不同機型，會顯示對應的設定路徑', (tester) async {
+    await pumpApp(tester);
+
+    final button = find.text('已經落地了？開啟網路');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    // 測試環境預設不是 iPhone，所以先選 Samsung，再選 iPhone，路徑要跟著變
+    await tester.tap(find.text('Samsung'));
+    await tester.pumpAndSettle();
+    expect(find.text('設定 > 連線 > SIM 卡管理器'), findsOneWidget);
+
+    await tester.tap(find.text('iPhone'));
+    await tester.pumpAndSettle();
+    expect(find.text('設定 > 行動服務 > 點選旅遊 eSIM'), findsOneWidget);
+    expect(find.text('設定 > 連線 > SIM 卡管理器'), findsNothing);
+  });
+
   testWidgets('排查流程：依回答前往下一題，也可以回上一題', (tester) async {
     await pumpApp(tester);
 

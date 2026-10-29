@@ -24,6 +24,7 @@ class GuideStep {
     required this.title,
     required this.body,
     required this.tip,
+    this.pathKey,
   });
 
   final String icon;
@@ -31,11 +32,16 @@ class GuideStep {
   final String body;
   final String tip;
 
+  /// 這一步要到手機設定的哪裡操作（'sim'、'roaming'、'dataSim'、'apn'）。
+  /// 實際的選單路徑依機型而定，放在 device_paths.json。沒有的話就不顯示路徑。
+  final String? pathKey;
+
   factory GuideStep.fromJson(Map<String, dynamic> json) => GuideStep(
         icon: json['icon'] as String,
         title: json['title'] as String,
         body: json['body'] as String,
         tip: json['tip'] as String,
+        pathKey: json['pathKey'] as String?,
       );
 }
 
@@ -161,6 +167,7 @@ class TroubleNode {
     required this.text,
     required this.options,
     this.action,
+    this.pathKey,
   });
 
   final String id;
@@ -172,6 +179,9 @@ class TroubleNode {
   /// 額外的動作按鈕，目前只有 'landing'（打開落地後三步驟）
   final String? action;
 
+  /// 這個節點要提示到手機設定的哪裡操作，和 GuideStep.pathKey 同一套
+  final String? pathKey;
+
   factory TroubleNode.fromJson(String id, Map<String, dynamic> json) =>
       TroubleNode(
         id: id,
@@ -179,6 +189,7 @@ class TroubleNode {
         title: json['title'] as String,
         text: (json['text'] as String?) ?? '',
         action: json['action'] as String?,
+        pathKey: json['pathKey'] as String?,
         options: ((json['options'] as List<dynamic>?) ?? const [])
             .map((e) => TroubleOption.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -219,4 +230,47 @@ Future<TroubleFlow> loadTroubleFlow() async {
   }
 
   return TroubleFlow(start: start, nodes: nodes);
+}
+
+/// 一種手機機型（或品牌）：iPhone、Samsung、Pixel…
+/// 每個機型有自己的設定路徑。資料在 assets/device_paths.json。
+class DeviceProfile {
+  const DeviceProfile({
+    required this.id,
+    required this.name,
+    required this.os,
+    required this.verified,
+    required this.paths,
+  });
+
+  final String id;
+  final String name;
+  final OsKind os;
+
+  /// 這份路徑是否已經在實機上核對過。沒核對過的，畫面上會提醒使用者。
+  final bool verified;
+
+  /// pathKey → 選單路徑
+  final Map<String, String> paths;
+
+  factory DeviceProfile.fromJson(Map<String, dynamic> json) => DeviceProfile(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        os: OsKind.values.byName(json['os'] as String),
+        verified: (json['verified'] as bool?) ?? false,
+        paths: (json['paths'] as Map<String, dynamic>)
+            .map((key, value) => MapEntry(key, value as String)),
+      );
+}
+
+Future<List<DeviceProfile>> loadDeviceProfiles() async {
+  final raw = await rootBundle.loadString('assets/device_paths.json');
+  final list = jsonDecode(raw) as List<dynamic>;
+  final profiles = list
+      .map((e) => DeviceProfile.fromJson(e as Map<String, dynamic>))
+      .toList();
+  if (profiles.isEmpty) {
+    throw const FormatException('device_paths.json 裡沒有任何機型');
+  }
+  return profiles;
 }

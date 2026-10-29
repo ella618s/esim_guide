@@ -7,15 +7,17 @@ import 'providers.dart';
 import 'troubleshoot_page.dart';
 
 /// 落地後：三步驟開啟網路。每完成一步就勾起來，進度會被記住。
+/// 選擇的手機機型不同，每一步會顯示對應的設定路徑。
 class LandingPage extends ConsumerWidget {
   const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final os = ref.watch(osKindProvider);
     final done = ref.watch(landingDoneProvider);
     final stepsAsync = ref.watch(landingStepsProvider);
+    final profilesAsync = ref.watch(deviceProfilesProvider);
+    final device = ref.watch(currentDeviceProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,21 +34,36 @@ class LandingPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('讀取步驟失敗：$error')),
         data: (allSteps) {
-          final steps = allSteps[os] ?? const <GuideStep>[];
+          if (profilesAsync.hasError) {
+            return Center(child: Text('讀取機型資料失敗：${profilesAsync.error}'));
+          }
+          if (device == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final profiles = profilesAsync.requireValue;
+          final steps = allSteps[device.os] ?? const <GuideStep>[];
           final doneCount = done.where((i) => i < steps.length).length;
           final allDone = steps.isNotEmpty && doneCount == steps.length;
 
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              SegmentedButton<OsKind>(
-                segments: const [
-                  ButtonSegment(value: OsKind.ios, label: Text('iPhone')),
-                  ButtonSegment(value: OsKind.android, label: Text('Android')),
+              Text('你的手機是？', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final profile in profiles)
+                    ChoiceChip(
+                      label: Text(profile.name),
+                      selected: profile.id == device.id,
+                      onSelected: (_) => ref
+                          .read(selectedDeviceIdProvider.notifier)
+                          .set(profile.id),
+                    ),
                 ],
-                selected: {os},
-                onSelectionChanged: (selection) =>
-                    ref.read(osKindProvider.notifier).set(selection.first),
               ),
               const SizedBox(height: 24),
               Text('依序完成這三步，就能上網了', style: theme.textTheme.titleLarge),
@@ -62,6 +79,7 @@ class LandingPage extends ConsumerWidget {
                 _LandingStepCard(
                   number: i + 1,
                   step: steps[i],
+                  device: device,
                   done: done.contains(i),
                   onChanged: (value) =>
                       ref.read(landingDoneProvider.notifier).setDone(i, value),
@@ -101,16 +119,67 @@ class LandingPage extends ConsumerWidget {
   }
 }
 
+/// 顯示「在哪裡操作」的路徑。給落地頁和排查頁共用。
+/// 這個機型沒有這個路徑時，不顯示任何東西。
+class DevicePathBox extends StatelessWidget {
+  const DevicePathBox({super.key, required this.device, required this.pathKey});
+
+  final DeviceProfile device;
+  final String? pathKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = pathKey == null ? null : device.paths[pathKey];
+    if (path == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.settings_outlined, size: 18),
+                const SizedBox(width: 6),
+                Text('${device.name} 的路徑', style: theme.textTheme.labelMedium),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(path, style: theme.textTheme.bodyLarge),
+            if (!device.verified) ...[
+              const SizedBox(height: 6),
+              Text(
+                '※ 依一般情況整理，系統版本不同時，名稱可能略有差異。',
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _LandingStepCard extends StatelessWidget {
   const _LandingStepCard({
     required this.number,
     required this.step,
+    required this.device,
     required this.done,
     required this.onChanged,
   });
 
   final int number;
   final GuideStep step;
+  final DeviceProfile device;
   final bool done;
   final ValueChanged<bool> onChanged;
 
@@ -143,6 +212,7 @@ class _LandingStepCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(step.body),
             const SizedBox(height: 12),
+            DevicePathBox(device: device, pathKey: step.pathKey),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

@@ -75,23 +75,47 @@ final guideIndexProvider =
 final landingStepsProvider =
     FutureProvider<Map<OsKind, List<GuideStep>>>((ref) => loadLandingSteps());
 
-/// 目前顯示哪一個系統的教學。預設依手機自己的系統，使用者也可以手動切換
-/// （例如幫爸媽設定時，可以切到對方的手機系統）
-class OsKindNotifier extends Notifier<OsKind> {
+/// 所有機型的設定路徑（資料來自 assets/device_paths.json）
+final deviceProfilesProvider =
+    FutureProvider<List<DeviceProfile>>((ref) => loadDeviceProfiles());
+
+/// 使用者選的機型 id，會被記住。
+/// 預設依手機自己的系統：iPhone 用 'ios'，Android 先用 'android_generic'。
+/// 也可以手動切換（例如幫爸媽設定時，選對方的手機機型）。
+class SelectedDeviceNotifier extends Notifier<String> {
+  static const _key = 'device_id';
+
   @override
-  OsKind build() {
+  String build() {
+    final saved = ref.watch(sharedPreferencesProvider).getString(_key);
+    if (saved != null) return saved;
+
     final platform = defaultTargetPlatform;
-    // macOS 也算 iOS：在 Mac 上用 Chrome 測試時，預設顯示 iPhone 的步驟
+    // macOS 也算 iOS：在 Mac 上用 Chrome 測試時，預設顯示 iPhone
     final isApple =
         platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
-    return isApple ? OsKind.ios : OsKind.android;
+    return isApple ? 'ios' : 'android_generic';
   }
 
-  void set(OsKind kind) => state = kind;
+  void set(String id) {
+    state = id;
+    ref.read(sharedPreferencesProvider).setString(_key, id);
+  }
 }
 
-final osKindProvider =
-    NotifierProvider<OsKindNotifier, OsKind>(OsKindNotifier.new);
+final selectedDeviceIdProvider =
+    NotifierProvider<SelectedDeviceNotifier, String>(SelectedDeviceNotifier.new);
+
+/// 目前實際使用的機型。如果存的 id 已經不在清單裡（例如之後移除了某個品牌），
+/// 就退回清單的第一個，避免畫面壞掉。載入中或失敗時是 null。
+final currentDeviceProvider = Provider<DeviceProfile?>((ref) {
+  final async = ref.watch(deviceProfilesProvider);
+  // hasValue / requireValue 在 Riverpod 各版本都能用（valueOrNull 在新版被移除了）
+  if (!async.hasValue) return null;
+  final profiles = async.requireValue;
+  final id = ref.watch(selectedDeviceIdProvider);
+  return profiles.firstWhere((p) => p.id == id, orElse: () => profiles.first);
+});
 
 /// 落地後三步驟：哪些已經勾選完成（存的是步驟編號 0、1、2）
 class LandingDoneNotifier extends Notifier<Set<int>> {

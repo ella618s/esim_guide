@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ios",
+    "name": "iPhone",
+    "os": "ios",
+    "verified": false,
+    "paths": {
+      "sim": "設定 > 行動服務 > 點選旅遊 eSIM",
+      "roaming": "設定 > 行動服務 > 旅遊 eSIM > 數據漫遊",
+      "dataSim": "設定 > 行動服務 > 行動數據",
+      "apn": "設定 > 行動服務 > 旅遊 eSIM > 行動數據網路"
+    }
+  },
+  {
+    "id": "android_generic",
+    "name": "其他 Android",
+    "os": "android",
+    "verified": false,
+    "paths": {
+      "sim": "設定 > 網路和網際網路 > SIM 卡（找不到的話，在設定的搜尋框輸入「SIM」）",
+      "roaming": "設定 > 網路和網際網路 > SIM 卡 > 旅遊 eSIM > 漫遊",
+      "dataSim": "設定 > 網路和網際網路 > SIM 卡 > 行動數據",
+      "apn": "設定 > 網路和網際網路 > SIM 卡 > 旅遊 eSIM > 存取點名稱"
+    }
+  },
+  {
+    "id": "samsung",
+    "name": "Samsung",
+    "os": "android",
+    "verified": false,
+    "paths": {
+      "sim": "設定 > 連線 > SIM 卡管理器",
+      "roaming": "設定 > 連線 > 行動網路 > 數據漫遊",
+      "dataSim": "設定 > 連線 > SIM 卡管理器 > 行動數據",
+      "apn": "設定 > 連線 > 行動網路 > 存取點名稱"
+    }
+  },
+  {
+    "id": "pixel",
+    "name": "Google Pixel",
+    "os": "android",
+    "verified": false,
+    "paths": {
+      "sim": "設定 > 網路和網際網路 > SIM 卡",
+      "roaming": "設定 > 網路和網際網路 > SIM 卡 > 旅遊 eSIM > 漫遊",
+      "dataSim": "設定 > 網路和網際網路 > SIM 卡 > 旅遊 eSIM > 行動數據",
+      "apn": "設定 > 網路和網際網路 > SIM 卡 > 旅遊 eSIM > 存取點名稱"
+    }
+  },
+  {
+    "id": "xiaomi",
+    "name": "小米 Xiaomi",
+    "os": "android",
+    "verified": false,
+    "paths": {
+      "sim": "設定 > SIM 卡與行動網路",
+      "roaming": "設定 > SIM 卡與行動網路 > 旅遊 eSIM > 漫遊",
+      "dataSim": "設定 > SIM 卡與行動網路 > 行動數據",
+      "apn": "設定 > SIM 卡與行動網路 > 旅遊 eSIM > 存取點名稱"
+    }
+  }
+]
