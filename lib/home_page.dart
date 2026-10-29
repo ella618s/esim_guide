@@ -6,6 +6,7 @@ import 'landing_page.dart';
 import 'models.dart';
 import 'providers.dart';
 import 'recommend_page.dart';
+import 'troubleshoot_page.dart';
 
 /// 現在不需要 StatefulWidget 了：狀態放在 tripProvider，畫面只負責「顯示」和「通知改變」
 class HomePage extends ConsumerWidget {
@@ -74,6 +75,13 @@ class HomePage extends ConsumerWidget {
               MaterialPageRoute<void>(builder: (_) => const LandingPage()),
             ),
             child: const Text('已經落地了？開啟網路'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const TroubleshootPage()),
+            ),
+            child: const Text('沒有網路？一起排查'),
           ),
           const SizedBox(height: 12),
           TextButton(

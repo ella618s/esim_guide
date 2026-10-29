@@ -52,6 +52,25 @@ void main() {
     expect(find.text('已完成 1 / 3'), findsOneWidget);
   });
 
+  testWidgets('排查流程：依回答前往下一題，也可以回上一題', (tester) async {
+    await pumpApp(tester);
+
+    final button = find.text('沒有網路？一起排查');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(find.text('手機畫面上方，有出現當地電信的名稱或訊號格嗎？'), findsOneWidget);
+
+    await tester.tap(find.text('有，但上不了網'));
+    await tester.pumpAndSettle();
+    expect(find.text('旅遊 eSIM 的「數據漫遊」有打開嗎？'), findsOneWidget);
+
+    await tester.tap(find.text('上一題'));
+    await tester.pumpAndSettle();
+    expect(find.text('手機畫面上方，有出現當地電信的名稱或訊號格嗎？'), findsOneWidget);
+  });
+
   testWidgets('會還原上次儲存的行程', (tester) async {
     await pumpApp(
       tester,

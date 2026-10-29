@@ -1,0 +1,129 @@
+{
+  "start": "q_signal",
+  "nodes": {
+    "q_signal": {
+      "kind": "question",
+      "title": "手機畫面上方，有出現當地電信的名稱或訊號格嗎？",
+      "text": "看螢幕最上方的狀態列。",
+      "options": [
+        { "label": "有，但上不了網", "next": "q_roaming" },
+        { "label": "沒有，一直顯示「無服務」或搜尋中", "next": "q_enabled" }
+      ]
+    },
+
+    "q_enabled": {
+      "kind": "question",
+      "title": "旅遊 eSIM 有沒有「開啟」？",
+      "text": "到「設定 > 行動服務」（Android：「SIM 卡」）檢查，旅遊 eSIM 的開關要是打開的。",
+      "options": [
+        { "label": "沒有開，或不確定", "next": "fix_enable" },
+        { "label": "有開著", "next": "fix_restart" }
+      ]
+    },
+    "fix_enable": {
+      "kind": "fix",
+      "title": "先開啟旅遊 eSIM",
+      "text": "照落地後的三個步驟，從第一步開始做一遍。",
+      "action": "landing",
+      "options": [
+        { "label": "做完了，可以上網了", "next": "done" },
+        { "label": "做完還是不行", "next": "fix_restart" }
+      ]
+    },
+    "fix_restart": {
+      "kind": "fix",
+      "title": "重新整理手機的網路",
+      "text": "先開啟飛航模式，等 10 秒再關閉。如果還是沒有訊號，再把手機重新開機，開機後等 1 到 2 分鐘。",
+      "options": [
+        { "label": "可以上網了", "next": "done" },
+        { "label": "還是不行", "next": "fix_location" }
+      ]
+    },
+    "fix_location": {
+      "kind": "fix",
+      "title": "換個地方試試看",
+      "text": "在地下室、電梯或偏遠地區，訊號本來就不穩。走到窗邊或戶外，等 1 到 2 分鐘。",
+      "options": [
+        { "label": "可以上網了", "next": "done" },
+        { "label": "還是不行", "next": "support" }
+      ]
+    },
+
+    "q_roaming": {
+      "kind": "question",
+      "title": "旅遊 eSIM 的「數據漫遊」有打開嗎？",
+      "text": "要打開的是旅遊 eSIM 那一張卡的漫遊，不是原本台灣的卡。",
+      "options": [
+        { "label": "沒有開，或不確定", "next": "fix_roaming" },
+        { "label": "有開", "next": "q_datasim" }
+      ]
+    },
+    "fix_roaming": {
+      "kind": "fix",
+      "title": "打開旅遊 eSIM 的數據漫遊",
+      "text": "照落地後三步驟的第二步操作。",
+      "action": "landing",
+      "options": [
+        { "label": "可以上網了", "next": "done" },
+        { "label": "還是不行", "next": "q_datasim" }
+      ]
+    },
+    "q_datasim": {
+      "kind": "question",
+      "title": "「行動數據」選的是旅遊 eSIM 嗎？",
+      "text": "如果選的是原本台灣的卡，手機會用錯卡上網，而且可能產生漫遊費。",
+      "options": [
+        { "label": "不是，或不確定", "next": "fix_datasim" },
+        { "label": "是旅遊 eSIM", "next": "q_quota" }
+      ]
+    },
+    "fix_datasim": {
+      "kind": "fix",
+      "title": "把行動數據改成旅遊 eSIM",
+      "text": "照落地後三步驟的第三步操作。",
+      "action": "landing",
+      "options": [
+        { "label": "可以上網了", "next": "done" },
+        { "label": "還是不行", "next": "q_quota" }
+      ]
+    },
+    "q_quota": {
+      "kind": "question",
+      "title": "方案的流量用完了，或天數到期了嗎？",
+      "text": "到你購買 eSIM 的供應商 App 或信件，查看剩餘流量與有效期限。",
+      "options": [
+        { "label": "用完或到期了", "next": "fix_topup" },
+        { "label": "還有流量，也沒到期", "next": "fix_apn" }
+      ]
+    },
+    "fix_topup": {
+      "kind": "fix",
+      "title": "加購流量或重新購買",
+      "text": "流量用完或已經到期，就需要加購或買新的方案。加購後可能要重新開機才會恢復。",
+      "options": [
+        { "label": "恢復了", "next": "done" },
+        { "label": "加購後還是不行", "next": "fix_apn" }
+      ]
+    },
+    "fix_apn": {
+      "kind": "fix",
+      "title": "手動填入供應商的網路設定",
+      "text": "少數情況需要手動設定。購買 eSIM 後收到的信件或訂單頁，通常會寫「APN」和一串英文字，到旅遊 eSIM 的「行動數據網路」（Android：「存取點名稱」）填入。找不到的話，直接問供應商客服會更快。",
+      "options": [
+        { "label": "可以上網了", "next": "done" },
+        { "label": "還是不行", "next": "support" }
+      ]
+    },
+
+    "done": {
+      "kind": "done",
+      "title": "太好了，可以上網了！",
+      "text": "祝旅途愉快。如果之後又斷線，可以再回來排查。"
+    },
+    "support": {
+      "kind": "support",
+      "title": "請聯絡供應商客服",
+      "text": "以上方法都試過了，可能是方案本身或當地電信的問題。請把訂單編號、你所在的國家和城市，以及剛才試過的步驟，一起告訴你購買 eSIM 的供應商客服，處理會比較快。"
+    }
+  }
+}

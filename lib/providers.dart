@@ -127,3 +127,7 @@ class LandingDoneNotifier extends Notifier<Set<int>> {
 
 final landingDoneProvider =
     NotifierProvider<LandingDoneNotifier, Set<int>>(LandingDoneNotifier.new);
+
+/// 沒網路時的排查流程（資料來自 assets/troubleshoot.json）
+final troubleshootProvider =
+    FutureProvider<TroubleFlow>((ref) => loadTroubleFlow());

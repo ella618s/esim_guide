@@ -131,3 +131,92 @@ List<EsimPlan> recommendPlans(
   });
   return candidates;
 }
+
+/// 排查流程裡，每個節點的種類
+enum TroubleKind {
+  question, // 問一個問題，依回答前往不同節點
+  fix, // 請使用者做一件事，再問有沒有解決
+  done, // 解決了
+  support, // 都試過了，建議聯絡客服
+}
+
+/// 節點上的一個按鈕：顯示的文字，與按下後前往哪個節點
+class TroubleOption {
+  const TroubleOption({required this.label, required this.next});
+
+  final String label;
+  final String next;
+
+  factory TroubleOption.fromJson(Map<String, dynamic> json) => TroubleOption(
+        label: json['label'] as String,
+        next: json['next'] as String,
+      );
+}
+
+class TroubleNode {
+  const TroubleNode({
+    required this.id,
+    required this.kind,
+    required this.title,
+    required this.text,
+    required this.options,
+    this.action,
+  });
+
+  final String id;
+  final TroubleKind kind;
+  final String title;
+  final String text;
+  final List<TroubleOption> options;
+
+  /// 額外的動作按鈕，目前只有 'landing'（打開落地後三步驟）
+  final String? action;
+
+  factory TroubleNode.fromJson(String id, Map<String, dynamic> json) =>
+      TroubleNode(
+        id: id,
+        kind: TroubleKind.values.byName(json['kind'] as String),
+        title: json['title'] as String,
+        text: (json['text'] as String?) ?? '',
+        action: json['action'] as String?,
+        options: ((json['options'] as List<dynamic>?) ?? const [])
+            .map((e) => TroubleOption.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+/// 整個排查流程：一個起點，加上所有節點（像一張「流程圖」）
+class TroubleFlow {
+  const TroubleFlow({required this.start, required this.nodes});
+
+  final String start;
+  final Map<String, TroubleNode> nodes;
+}
+
+Future<TroubleFlow> loadTroubleFlow() async {
+  final raw = await rootBundle.loadString('assets/troubleshoot.json');
+  final json = jsonDecode(raw) as Map<String, dynamic>;
+
+  final nodes = (json['nodes'] as Map<String, dynamic>).map(
+    (id, value) => MapEntry(
+      id,
+      TroubleNode.fromJson(id, value as Map<String, dynamic>),
+    ),
+  );
+  final start = json['start'] as String;
+
+  // 檢查：起點和每個選項指向的節點都要存在。
+  // 之後自己改 JSON 時，只要打錯一個 id，這裡會馬上告訴你是哪一個。
+  if (!nodes.containsKey(start)) {
+    throw FormatException('找不到起點節點：$start');
+  }
+  for (final node in nodes.values) {
+    for (final option in node.options) {
+      if (!nodes.containsKey(option.next)) {
+        throw FormatException('「${node.id}」的選項指向不存在的節點：${option.next}');
+      }
+    }
+  }
+
+  return TroubleFlow(start: start, nodes: nodes);
+}

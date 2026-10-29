@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'guide_page.dart' show iconFor;
 import 'models.dart';
 import 'providers.dart';
+import 'troubleshoot_page.dart';
 
 /// 落地後：三步驟開啟網路。每完成一步就勾起來，進度會被記住。
 class LandingPage extends ConsumerWidget {
@@ -83,6 +84,15 @@ class LandingPage extends ConsumerWidget {
                   ),
                 ),
               ],
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const TroubleshootPage(),
+                  ),
+                ),
+                child: const Text('還是沒有網路？一起排查'),
+              ),
             ],
           );
         },
