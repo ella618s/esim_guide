@@ -2,6 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart' show rootBundle;
 
+/// 目前支援的國家（之後可以改成從資料載入）
+const supportedCountries = ['日本', '韓國', '泰國'];
+
+/// 使用者這次的行程：去哪裡、去幾天
+class Trip {
+  const Trip({required this.country, required this.days});
+
+  final String country;
+  final int days;
+
+  /// 只改其中一個欄位，其他沿用（Kotlin 的 data class copy() 概念）
+  Trip copyWith({String? country, int? days}) =>
+      Trip(country: country ?? this.country, days: days ?? this.days);
+}
+
 /// 一個教學步驟（對應 assets/steps.json 裡的一筆資料）
 class GuideStep {
   const GuideStep({

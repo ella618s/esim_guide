@@ -1,45 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'guide_page.dart';
+import 'models.dart';
+import 'providers.dart';
 import 'recommend_page.dart';
 
-/// 目前支援的國家（之後可以改成從資料載入）
-const supportedCountries = ['日本', '冰島','韓國', '泰國'];
-
-class HomePage extends StatefulWidget {
+/// 現在不需要 StatefulWidget 了：狀態放在 tripProvider，畫面只負責「顯示」和「通知改變」
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  String _country = supportedCountries.first;
-  int _days = 5;
-
-  void _changeDays(int delta) {
-    setState(() {
-      _days = (_days + delta).clamp(1, 30).toInt();
-    });
-  }
-
-  void _openRecommend() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => RecommendPage(country: _country, days: _days),
-      ),
-    );
-  }
-
-  void _openGuide() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const GuidePage()),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    // watch：資料一變，這個畫面就會自動重畫
+    final trip = ref.watch(tripProvider);
+    // read(...notifier)：只是要呼叫方法，不需要因為它重畫
+    final tripNotifier = ref.read(tripProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(title: const Text('eSIM 小幫手')),
@@ -54,8 +32,8 @@ class _HomePageState extends State<HomePage> {
               for (final country in supportedCountries)
                 ChoiceChip(
                   label: Text(country),
-                  selected: country == _country,
-                  onSelected: (_) => setState(() => _country = country),
+                  selected: country == trip.country,
+                  onSelected: (_) => tripNotifier.setCountry(country),
                 ),
             ],
           ),
@@ -66,27 +44,34 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton.filledTonal(
-                onPressed: _days > 1 ? () => _changeDays(-1) : null,
+                onPressed:
+                    trip.days > 1 ? () => tripNotifier.changeDays(-1) : null,
                 icon: const Icon(Icons.remove),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('$_days 天', style: theme.textTheme.headlineMedium),
+                child:
+                    Text('${trip.days} 天', style: theme.textTheme.headlineMedium),
               ),
               IconButton.filledTonal(
-                onPressed: _days < 30 ? () => _changeDays(1) : null,
+                onPressed:
+                    trip.days < 30 ? () => tripNotifier.changeDays(1) : null,
                 icon: const Icon(Icons.add),
               ),
             ],
           ),
           const SizedBox(height: 40),
           FilledButton(
-            onPressed: _openRecommend,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const RecommendPage()),
+            ),
             child: const Text('看推薦方案'),
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: _openGuide,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const GuidePage()),
+            ),
             child: const Text('先看 eSIM 安裝教學'),
           ),
         ],
