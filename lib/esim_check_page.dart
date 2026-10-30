@@ -28,7 +28,7 @@ class EsimCheckPage extends ConsumerWidget {
       body: supportAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         // checkEsimSupport 已經把所有錯誤轉成 unknown，這裡只是保險
-        error: (_, __) => const _ResultView(support: EsimSupport.unknown),
+        error: (_, _) => const _ResultView(support: EsimSupport.unknown),
         data: (support) => _ResultView(support: support),
       ),
     );
